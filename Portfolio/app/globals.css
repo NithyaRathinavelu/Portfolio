@@ -37,7 +37,7 @@ ul, ol { padding: 0; list-style: none; }
 /* ---------- Hero ---------- */
 .hero {
   position: relative; overflow: hidden; color: var(--cream);
-  background: linear-gradient(180deg, var(--night), var(--night-2));
+  background: linear-gradient(180deg, #18211C, #0E1411);
   min-height: min(100svh, 980px); display: grid; grid-template-rows: 96px 1fr 84px;
   --aw: clamp(88px, 18.75vw, 270px);
   --gap: clamp(10px, 2.8vw, 40px);
@@ -48,7 +48,7 @@ ul, ol { padding: 0; list-style: none; }
   background-image: linear-gradient(to right, rgba(245, 243, 238, 0.07) 1px, transparent 1px);
   background-size: calc(100% / 12) 100%;
 }
-.hero__glow { position: absolute; left: 12%; right: 12%; top: 26%; height: 52%; background: rgba(79, 114, 89, 0.35); filter: blur(140px); border-radius: 50%; pointer-events: none; }
+.hero__glow { position: absolute; left: 26%; right: 26%; top: 34%; height: 34%; background: rgba(79, 114, 89, 0.18); filter: blur(120px); border-radius: 50%; pointer-events: none; }
 .hero__night {
   position: absolute; inset: 0; pointer-events: none; background: rgba(6, 12, 14, 0.55);
   -webkit-mask-image: radial-gradient(circle var(--hold-r, 0px) at var(--hold-x, 50%) var(--hold-y, 50%), #000 96%, transparent 100%);
