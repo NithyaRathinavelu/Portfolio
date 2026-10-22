@@ -96,7 +96,7 @@ uniform vec2 holdPoint; uniform float holdRadius;
 void main () {
   vec2 vel = texture(uVelocity, vUv).xy;
   vec2 offset = vel * displace;
-  float len = length(offset); if (len > 0.025) { offset *= 0.025 / len; }
+  float len = length(offset); if (len > 0.03) { offset *= 0.03 / len; }
   vec4 scene = texture(uScene, vUv - offset);
   vec3 dye = texture(uDye, vUv).rgb;
   vec2 d = vUv - holdPoint; d.x *= aspectRatio;
@@ -104,7 +104,7 @@ void main () {
   night *= step(0.001, holdRadius);
   vec3 nightGrade = scene.rgb * vec3(0.42, 0.52, 0.6) + vec3(0.0, 0.01, 0.03) * scene.a;
   vec3 rgb = mix(scene.rgb, nightGrade, night);
-  vec3 tint = min(dye * 0.32, vec3(0.22));
+  vec3 tint = min(dye * 0.75, vec3(0.38, 0.4, 0.34));
   float a = max(scene.a, max(tint.r, max(tint.g, tint.b)));
   outColor = vec4(rgb + tint, a);
 }`;
@@ -140,7 +140,7 @@ export function createFluid(canvas, { lowPower = false } = {}) {
 
   const SIM = lowPower ? 64 : 128;
   const DYE = lowPower ? 256 : 512;
-  const config = { velocityDissipation: 1.4, dyeDissipation: 2.2, pressure: 0.8, iterations: lowPower ? 12 : 20, curl: 18, radius: 0.0016, displace: 0.00016 };
+  const config = { velocityDissipation: 1.3, dyeDissipation: 1.2, pressure: 0.8, iterations: lowPower ? 12 : 20, curl: 20, radius: 0.002, displace: 0.0002 };
 
   let vert;
   try { vert = compile(gl, gl.VERTEX_SHADER, BASE_VERT); } catch (e) { return null; }
