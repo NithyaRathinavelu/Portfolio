@@ -108,10 +108,10 @@ export const about = {
     ['Education', [['MBA, Human Resource Management', 'Bharathiyar University, Coimbatore'], ['Bachelor of Computer Applications', 'Vysya College, Salem']]],
   ],
   polaroids: [
-    { title: 'Life in green', note: 'patience, and how things grow', image: '/images/polaroid-1.jpg', tilt: -6, drop: 24 },
-    { title: 'Race Weekend', note: 'precision under pressure', image: '/images/polaroid-2.jpg', tilt: 4, drop: 0 },
-    { title: 'Places & Perspectives', note: 'learning to look closely', image: '/images/polaroid-3.jpg', tilt: -3, drop: 38 },
-    { title: 'A Study in Style', note: 'details, colour and craft', image: '/images/polaroid-4.jpg', tilt: 5, drop: 8 },
-    { title: 'The Mind Edit', note: 'less noise, more clarity', image: '/images/polaroid-5.jpg', tilt: -4, drop: 30 },
+    { title: 'Life in green', note: 'patience, and how things grow', image: '/images/polaroid-1.jpg', tilt: -6, drop: 24, photoTilt: -1 },
+    { title: 'Race Weekend', note: 'precision under pressure', image: '/images/polaroid-2.jpg', tilt: 4, drop: 0, photoTilt: -4 },
+    { title: 'Places & Perspectives', note: 'learning to look closely', image: '/images/polaroid-3.jpg', tilt: -3, drop: 38, photoTilt: -1 },
+    { title: 'A Study in Style', note: 'details, colour and craft', image: '/images/polaroid-4.jpg', tilt: 5, drop: 8, photoTilt: 3 },
+    { title: 'The Mind Edit', note: 'less noise, more clarity', image: '/images/polaroid-5.jpg', tilt: -4, drop: 30, photoTilt: -3 },
   ],
 };
