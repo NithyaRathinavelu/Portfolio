@@ -17,9 +17,9 @@ const DREAMS = [
 ];
 
 const DYE = [
-  [0.09, 0.26, 0.14],
-  [0.36, 0.16, 0.09],
-  [0.13, 0.3, 0.18],
+  [0.22, 0.55, 0.34],
+  [0.72, 0.36, 0.2],
+  [0.3, 0.62, 0.42],
 ];
 
 export default function Hero() {
@@ -145,7 +145,7 @@ export default function Hero() {
       updateHold(dt);
       if (fluid) {
         if (pointer.moved) {
-          const dx = (pointer.x - pointer.px) * 2800, dy = (pointer.y - pointer.py) * 2800;
+          const dx = (pointer.x - pointer.px) * 4000, dy = (pointer.y - pointer.py) * 4000;
           if (Math.abs(dx) + Math.abs(dy) > 0.5) {
             pointer.colour = (pointer.colour + 1) % (DYE.length * 20);
             fluid.splat(pointer.x, pointer.y, dx, dy, DYE[Math.floor(pointer.colour / 20)]);
