@@ -83,9 +83,12 @@ void main () {
   outColor = vec4(v, 0.0, 1.0);
 }`;
 
-const RESTORE = HEAD + `
-uniform sampler2D uImage; uniform sampler2D uScene; uniform float amount;
-void main () { outColor = mix(texture(uImage, vUv), texture(uScene, vUv), amount); }`;
+const UV_RESET = HEAD + `
+void main () { outColor = vec4(vUv, 0.0, 1.0); }`;
+
+const UV_RELAX = HEAD + `
+uniform sampler2D uMap; uniform float amount;
+void main () { vec2 m = texture(uMap, vUv).xy; outColor = vec4(mix(m, vUv, amount), 0.0, 1.0); }`;
 
 const MULTIPLY = HEAD + `
 uniform sampler2D uTexture; uniform float value;
@@ -94,16 +97,16 @@ void main () { outColor = value * texture(uTexture, vUv); }`;
 // Draws the arches, pushed by the fluid, with the dye on top and the
 // press-and-hold "night" circle. The scene texture is premultiplied.
 const DISPLAY = HEAD + `
-uniform sampler2D uScene; uniform sampler2D uVelocity; uniform sampler2D uDye; uniform sampler2D uReveal;
-uniform float displace; uniform float aspectRatio; uniform vec2 holdPoint; uniform float holdRadius; uniform float time;
+uniform sampler2D uScene; uniform sampler2D uMap; uniform sampler2D uDye; uniform sampler2D uReveal;
+uniform float aspectRatio; uniform vec2 holdPoint; uniform float holdRadius; uniform float time;
 void main () {
-  vec2 offset = texture(uVelocity, vUv).xy * displace;
-  float len = length(offset); if (len > 0.028) { offset *= 0.028 / len; }
-  vec4 img = texture(uScene, vUv - offset);
+  vec2 src = texture(uMap, vUv).xy;            // where this pixel's colour comes from now
+  vec4 img = texture(uScene, src);              // drawn fresh each frame, so it stays crisp
   vec3 dye = texture(uDye, vUv).rgb;
-  vec3 tint = min(dye * 0.55, vec3(0.3, 0.32, 0.27));
-  vec3 rgb = img.rgb + tint;
-  float a = max(img.a, max(tint.r, max(tint.g, tint.b)));
+  float amt = clamp(max(dye.r, max(dye.g, dye.b)) * 1.6, 0.0, 1.0);
+  vec3 hue = dye / max(max(dye.r, max(dye.g, dye.b)), 0.001);
+  vec3 rgb = mix(img.rgb, hue * 0.78 * img.a + img.rgb * 0.25, amt * 0.75 * img.a);
+  float a = img.a;
 
   // Press and hold: a wobbly liquid bubble that reveals the dream places.
   if (holdRadius > 0.001) {
@@ -113,9 +116,10 @@ void main () {
     float r = holdRadius * wob;
     float dist = length(d);
     float inside = 1.0 - smoothstep(r - 0.012, r, dist);
-    vec4 rev = texture(uReveal, vUv - offset);
+    vec4 rev = texture(uReveal, src);
     vec3 night = mix(vec3(0.03, 0.06, 0.07), vec3(0.07, 0.11, 0.12), vUv.y);
-    vec3 revCol = rev.rgb + night * (1.0 - rev.a) + tint;
+    vec3 revRgb = mix(rev.rgb, hue * 0.78 * rev.a + rev.rgb * 0.25, amt * 0.75 * rev.a);
+    vec3 revCol = revRgb + night * (1.0 - rev.a);
     float rim = (1.0 - smoothstep(0.0, 0.03, abs(dist - r))) * step(0.02, holdRadius);
     float glow = exp(-max(dist - r, 0.0) * 22.0) * (1.0 - inside) * 0.5;
     vec3 rimCol = vec3(0.92, 0.8, 0.66);
@@ -157,7 +161,7 @@ export function createFluid(canvas, { lowPower = false } = {}) {
 
   const SIM = lowPower ? 64 : 128;
   const DYE = lowPower ? 256 : 512;
-  const config = { velocityDissipation: 1.35, dyeDissipation: 1.7, pressure: 0.8, iterations: lowPower ? 12 : 20, curl: 19, radius: 0.0018, displace: 0.00018 };
+  const config = { velocityDissipation: 1.0, dyeDissipation: 1.5, pressure: 0.8, iterations: lowPower ? 12 : 20, curl: 14, radius: 0.0034, relax: 1.3 };
 
   let vert;
   try { vert = compile(gl, gl.VERTEX_SHADER, BASE_VERT); } catch (e) { return null; }
@@ -166,7 +170,7 @@ export function createFluid(canvas, { lowPower = false } = {}) {
     P = {
       splat: program(gl, vert, SPLAT), advect: program(gl, vert, ADVECT), divergence: program(gl, vert, DIVERGENCE),
       curl: program(gl, vert, CURL), vorticity: program(gl, vert, VORTICITY), pressure: program(gl, vert, PRESSURE),
-      gradient: program(gl, vert, GRADIENT), multiply: program(gl, vert, MULTIPLY), restore: program(gl, vert, RESTORE), display: program(gl, vert, DISPLAY),
+      gradient: program(gl, vert, GRADIENT), multiply: program(gl, vert, MULTIPLY), uvReset: program(gl, vert, UV_RESET), uvRelax: program(gl, vert, UV_RELAX), display: program(gl, vert, DISPLAY),
     };
   } catch (e) { return null; }
 
@@ -197,13 +201,15 @@ export function createFluid(canvas, { lowPower = false } = {}) {
     return { get read() { return a; }, get write() { return b; }, swap() { const t = a; a = b; b = t; }, w, h, texel: a.texel };
   }
 
-  let velocity, dye, divergence, curlT, pressure, image, aspect = 1;
+  let velocity, dye, divergence, curlT, pressure, uvmap, aspect = 1;
   function sizes() {
     aspect = canvas.width / Math.max(1, canvas.height);
     const simW = aspect >= 1 ? Math.round(SIM * aspect) : SIM, simH = aspect >= 1 ? SIM : Math.round(SIM / aspect);
     const dyeW = aspect >= 1 ? Math.round(DYE * aspect) : DYE, dyeH = aspect >= 1 ? DYE : Math.round(DYE / aspect);
     velocity = pair(simW, simH); dye = pair(dyeW, dyeH);
     divergence = target(simW, simH); curlT = target(simW, simH); pressure = pair(simW, simH);
+    uvmap = pair(dyeW, dyeH);
+    resetMap();
   }
   sizes();
 
@@ -266,14 +272,24 @@ export function createFluid(canvas, { lowPower = false } = {}) {
     gl.uniform2f(s.u.texelSize, ...dye.texel);
     gl.uniform1i(s.u.uVelocity, bind(0, velocity.read.tex)); gl.uniform1i(s.u.uSource, bind(1, dye.read.tex));
     gl.uniform1f(s.u.dissipation, config.dyeDissipation); blit(dye.write); dye.swap();
+    gl.uniform2f(s.u.texelSize, ...uvmap.texel);
+    gl.uniform1i(s.u.uVelocity, bind(0, velocity.read.tex)); gl.uniform1i(s.u.uSource, bind(1, uvmap.read.tex));
+    gl.uniform1f(s.u.dissipation, 0.0); blit(uvmap.write); uvmap.swap();
+    const r = P.uvRelax; gl.useProgram(r.p); gl.uniform2f(r.u.texelSize, ...uvmap.texel);
+    gl.uniform1i(r.u.uMap, bind(0, uvmap.read.tex)); gl.uniform1f(r.u.amount, Math.min(1, config.relax * dt));
+    blit(uvmap.write); uvmap.swap();
+  }
+  function resetMap() {
+    if (!P || !uvmap) return;
+    gl.useProgram(P.uvReset.p); gl.uniform2f(P.uvReset.u.texelSize, ...uvmap.texel);
+    blit(uvmap.write); uvmap.swap(); blit(uvmap.write); uvmap.swap();
   }
 
   function render(hold) {
     const s = P.display; gl.useProgram(s.p);
     gl.uniform2f(s.u.texelSize, 1 / canvas.width, 1 / canvas.height);
     gl.uniform1i(s.u.uScene, bind(0, sceneTex));
-    gl.uniform1i(s.u.uVelocity, bind(3, velocity.read.tex));
-    gl.uniform1f(s.u.displace, config.displace);
+    gl.uniform1i(s.u.uMap, bind(3, uvmap.read.tex));
     gl.uniform1i(s.u.uDye, bind(1, dye.read.tex));
     gl.uniform1i(s.u.uReveal, bind(2, revealTex));
     gl.uniform1f(s.u.time, performance.now() / 1000);
