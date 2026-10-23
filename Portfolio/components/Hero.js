@@ -10,16 +10,23 @@ const ARCHES = [
   { src: '/images/hero-arch-3.jpg', alt: 'One clear path through an open arch' },
 ];
 
+const DREAMS = [
+  { src: '/images/dream-1.jpg', tint: '#D9A46A' },
+  { src: '/images/dream-2.jpg', tint: '#C9655A' },
+  { src: '/images/dream-3.jpg', tint: '#5E9A86' },
+];
+
 const DYE = [
-  [0.09, 0.26, 0.14],
-  [0.36, 0.16, 0.09],
-  [0.13, 0.3, 0.18],
+  [0.12, 0.42, 0.22],
+  [0.56, 0.24, 0.12],
+  [0.18, 0.5, 0.3],
 ];
 
 export default function Hero() {
   const heroRef = useRef(null);
   const canvasRef = useRef(null);
   const archRefs = useRef([]);
+  const cursorRef = useRef(null);
   const hold = useRef({ x: 0.5, y: 0.5, r: 0, target: 0 });
   const [fluidOn, setFluidOn] = useState(false);
   const [hinted, setHinted] = useState(false);
@@ -40,42 +47,53 @@ export default function Hero() {
       return img;
     });
 
+    const dreams = DREAMS.map((d) => { const img = new Image(); img.src = d.src; return img; });
+    const dreamScene = document.createElement('canvas');
+
     // Draw the three arches (with their dark overlay) into a picture the fluid can move.
     const scene = document.createElement('canvas');
-    function drawScene() {
-      if (!fluid) return;
+    function archPath(ctx, x, y, w, h) {
+      const rad = w / 2;
+      ctx.beginPath();
+      ctx.moveTo(x, y + h);
+      ctx.lineTo(x, y + rad);
+      ctx.arc(x + rad, y + rad, rad, Math.PI, 0);
+      ctx.lineTo(x + w, y + h);
+      ctx.closePath();
+    }
+    function cover(ctx, img, x, y, w, h) {
+      const s = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+      const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+      ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+    }
+    function paint(target, list, fallback, overlay) {
       const rect = hero.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      scene.width = Math.round(rect.width * dpr);
-      scene.height = Math.round(rect.height * dpr);
-      const ctx = scene.getContext('2d');
-      ctx.clearRect(0, 0, scene.width, scene.height);
+      target.width = Math.round(rect.width * dpr);
+      target.height = Math.round(rect.height * dpr);
+      const ctx = target.getContext('2d');
+      ctx.clearRect(0, 0, target.width, target.height);
       archRefs.current.forEach((el, i) => {
         if (!el) return;
         const r = el.getBoundingClientRect();
-        const x = (r.left - rect.left) * dpr, y = (r.top - rect.top) * dpr, w = r.width * dpr, h = r.height * dpr, rad = w / 2;
+        const x = (r.left - rect.left) * dpr, y = (r.top - rect.top) * dpr, w = r.width * dpr, h = r.height * dpr;
         ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(x, y + h);
-        ctx.lineTo(x, y + rad);
-        ctx.arc(x + rad, y + rad, rad, Math.PI, 0);
-        ctx.lineTo(x + w, y + h);
-        ctx.closePath();
+        archPath(ctx, x, y, w, h);
         ctx.clip();
-        const img = images[i];
-        if (img.complete && img.naturalWidth) {
-          const s = Math.max(w / img.naturalWidth, h / img.naturalHeight);
-          const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
-          ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
-        } else {
-          ctx.fillStyle = '#C8C3B4';
-          ctx.fillRect(x, y, w, h);
-        }
-        ctx.fillStyle = 'rgba(19, 26, 22, 0.38)';
+        const img = list[i];
+        if (img.complete && img.naturalWidth) cover(ctx, img, x, y, w, h);
+        else { ctx.fillStyle = fallback[i]; ctx.fillRect(x, y, w, h); }
+        ctx.fillStyle = overlay;
         ctx.fillRect(x, y, w, h);
         ctx.restore();
       });
+    }
+    function drawScene() {
+      if (!fluid) return;
+      paint(scene, images, ['#C8C3B4', '#C8C3B4', '#C8C3B4'], 'rgba(19, 26, 22, 0.38)');
       fluid.setScene(scene);
+      paint(dreamScene, dreams, DREAMS.map((d) => d.tint), 'rgba(10, 14, 16, 0.22)');
+      fluid.setReveal(dreamScene);
     }
 
     function size() {
@@ -96,6 +114,7 @@ export default function Hero() {
       if (!pointer.moved) { pointer.px = x; pointer.py = y; }
       pointer.x = x; pointer.y = y; pointer.moved = true;
       if (hold.current.target > 0) { hold.current.x = x; hold.current.y = y; }
+      const c = cursorRef.current; if (c && e.pointerType === 'mouse') { const r = hero.getBoundingClientRect(); c.style.transform = `translate(${e.clientX - r.left}px, ${e.clientY - r.top}px)`; c.classList.add('is-on'); c.classList.toggle('is-link', !!e.target.closest('a, button')); }
     }
     function onDown(e) {
       if (e.target.closest('a, button')) return;
@@ -108,24 +127,25 @@ export default function Hero() {
     // Press and hold: a circle grows from the pointer and turns the scene to night.
     function updateHold(dt) {
       const h = hold.current;
-      const max = 1.6;
+      const max = 2.2;
       const goal = h.target ? max : 0;
-      const speed = h.target ? 0.9 : 1.6;
+      const speed = h.target ? 0.75 : 2.2;
       if (reduce) h.r = goal;
       else h.r += Math.sign(goal - h.r) * Math.min(Math.abs(goal - h.r), speed * dt);
       const rect = hero.getBoundingClientRect();
       hero.style.setProperty('--hold-x', `${h.x * 100}%`);
       hero.style.setProperty('--hold-y', `${(1 - h.y) * 100}%`);
       hero.style.setProperty('--hold-r', `${h.r * Math.max(rect.width, rect.height)}px`);
+      hero.style.setProperty('--hold-amt', String(Math.min(1, Math.max(0, (h.r - 0.35) / 0.5))));
     }
 
     function loop(now) {
-      const dt = Math.min((now - last) / 1000, 0.033);
+      const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       updateHold(dt);
       if (fluid) {
         if (pointer.moved) {
-          const dx = (pointer.x - pointer.px) * 2800, dy = (pointer.y - pointer.py) * 2800;
+          const dx = (pointer.x - pointer.px) * 5200, dy = (pointer.y - pointer.py) * 5200;
           if (Math.abs(dx) + Math.abs(dy) > 0.5) {
             pointer.colour = (pointer.colour + 1) % (DYE.length * 20);
             fluid.splat(pointer.x, pointer.y, dx, dy, DYE[Math.floor(pointer.colour / 20)]);
@@ -147,12 +167,15 @@ export default function Hero() {
     if (fluid) {
       setFluidOn(true);
       images.forEach((img) => img.addEventListener('load', drawScene));
+      dreams.forEach((img) => img.addEventListener('load', drawScene));
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawScene);
       drawScene();
     }
 
     const ro = new ResizeObserver(size);
     ro.observe(hero);
+    const onLeave = () => cursorRef.current && cursorRef.current.classList.remove('is-on');
+    hero.addEventListener('pointerleave', onLeave);
     hero.addEventListener('pointermove', onMove);
     hero.addEventListener('pointerdown', onDown);
     window.addEventListener('pointerup', onUp);
@@ -162,6 +185,7 @@ export default function Hero() {
     return () => {
       cancelAnimationFrame(frame);
       ro.disconnect();
+      hero.removeEventListener('pointerleave', onLeave);
       hero.removeEventListener('pointermove', onMove);
       hero.removeEventListener('pointerdown', onDown);
       window.removeEventListener('pointerup', onUp);
@@ -176,6 +200,7 @@ export default function Hero() {
       <div className="hero__glow" aria-hidden="true" />
       <div className="hero__night" aria-hidden="true" />
       <canvas ref={canvasRef} className="hero__canvas" aria-hidden="true" />
+      <div ref={cursorRef} className="hero__cursor" aria-hidden="true"><span /></div>
 
       <div className="hero__top">
         <a className="hero__logo" href="/" aria-label="Nithya Rathinavelu, home">
@@ -207,6 +232,7 @@ export default function Hero() {
             </span>
           </h1>
         </div>
+        <p className="hero__dream" aria-hidden="true">Places on my list: Amalfi Coast · Tulip fields · Northern lights</p>
         <p className={`hero__hint${hinted ? ' is-hidden' : ''}`} aria-hidden="true">
           <span className="hero__hint-dot" />
           <span className="hero__hint-mouse">Press and hold</span>
