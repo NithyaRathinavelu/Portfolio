@@ -17,9 +17,9 @@ const DREAMS = [
 ];
 
 const DYE = [
-  [0.22, 0.55, 0.34],
-  [0.72, 0.36, 0.2],
-  [0.3, 0.62, 0.42],
+  [0.3, 0.7, 0.45],
+  [0.85, 0.45, 0.26],
+  [0.4, 0.78, 0.55],
 ];
 
 export default function Hero() {
@@ -145,10 +145,17 @@ export default function Hero() {
       updateHold(dt);
       if (fluid) {
         if (pointer.moved) {
-          const dx = (pointer.x - pointer.px) * 3800, dy = (pointer.y - pointer.py) * 3800;
-          if (Math.abs(dx) + Math.abs(dy) > 0.5) {
-            pointer.colour = (pointer.colour + 1) % (DYE.length * 20);
-            fluid.splat(pointer.x, pointer.y, dx, dy, DYE[Math.floor(pointer.colour / 20)]);
+          // Fill in the whole path since the last frame, so the trail is one continuous stroke.
+          const mx = pointer.x - pointer.px, my = pointer.y - pointer.py;
+          const dist = Math.hypot(mx, my);
+          if (dist > 0.0004) {
+            const steps = Math.min(24, Math.max(1, Math.ceil(dist / 0.006)));
+            pointer.colour = (pointer.colour + 1) % (DYE.length * 40);
+            const col = DYE[Math.floor(pointer.colour / 40)];
+            for (let i = 1; i <= steps; i++) {
+              const t = i / steps;
+              fluid.splat(pointer.px + mx * t, pointer.py + my * t, (mx / steps) * 15000, (my / steps) * 15000, col.map((c) => c / Math.sqrt(steps)));
+            }
           }
           pointer.px = pointer.x; pointer.py = pointer.y;
         }
