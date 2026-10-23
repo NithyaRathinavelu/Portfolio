@@ -128,7 +128,7 @@ export default function About() {
           </div>
           <ul className="polaroids">
             {about.polaroids.map((p) => (
-              <li className="polaroid" key={p.title} style={{ '--tilt': `${p.tilt}deg`, '--drop': `${p.drop}px` }}>
+              <li className="polaroid" key={p.title} style={{ '--tilt': `${p.tilt}deg`, '--drop': `${p.drop}px`, '--photo-tilt': `${p.photoTilt || 0}deg` }}>
                 <span className="polaroid__tape" aria-hidden="true" />
                 <img src={p.image} alt="" />
                 <p className="polaroid__title">{p.title}</p>
