@@ -161,7 +161,7 @@ export function createFluid(canvas, { lowPower = false } = {}) {
 
   const SIM = lowPower ? 64 : 128;
   const DYE = lowPower ? 256 : 512;
-  const config = { velocityDissipation: 1.0, dyeDissipation: 1.5, pressure: 0.8, iterations: lowPower ? 12 : 20, curl: 14, radius: 0.0034, relax: 1.3 };
+  const config = { velocityDissipation: 2.8, dyeDissipation: 2.4, pressure: 0.8, iterations: lowPower ? 12 : 20, curl: 10, radius: 0.0028, relax: 3.2 };
 
   let vert;
   try { vert = compile(gl, gl.VERTEX_SHADER, BASE_VERT); } catch (e) { return null; }
