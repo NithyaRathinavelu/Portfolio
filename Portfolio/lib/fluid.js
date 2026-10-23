@@ -107,7 +107,10 @@ void main () {
   vec3 hue = dye / max(max(dye.r, max(dye.g, dye.b)), 0.001);
   vec3 glowCol = mix(hue * 0.85, vec3(0.95, 0.92, 0.85), smoothstep(0.75, 1.0, amt) * 0.35);
   vec3 rgb = mix(img.rgb, glowCol * img.a, amt * 0.85 * img.a);
-  float a = img.a;
+  // a milder, smoky trail on the dark background outside the arches
+  float wisp = smoothstep(0.15, 0.95, amt) * 0.32 * (1.0 - img.a);
+  rgb += hue * 0.7 * wisp;
+  float a = max(img.a, wisp);
 
   // Press and hold: a wobbly liquid bubble that reveals the dream places.
   if (holdRadius > 0.001) {
