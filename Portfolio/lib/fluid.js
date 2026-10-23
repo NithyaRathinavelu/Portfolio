@@ -103,9 +103,9 @@ void main () {
   vec2 src = texture(uMap, vUv).xy;            // where this pixel's colour comes from now
   vec4 img = texture(uScene, src);              // drawn fresh each frame, so it stays crisp
   vec3 dye = texture(uDye, vUv).rgb;
-  float amt = clamp(max(dye.r, max(dye.g, dye.b)) * 1.6, 0.0, 1.0);
+  float amt = clamp(max(dye.r, max(dye.g, dye.b)) * 1.45, 0.0, 1.0);
   vec3 hue = dye / max(max(dye.r, max(dye.g, dye.b)), 0.001);
-  vec3 rgb = mix(img.rgb, hue * 0.78 * img.a + img.rgb * 0.25, amt * 0.75 * img.a);
+  vec3 rgb = img.rgb + (hue * 0.55 * img.a - img.rgb * 0.25) * amt * 0.6 * img.a;
   float a = img.a;
 
   // Press and hold: a wobbly liquid bubble that reveals the dream places.
@@ -118,7 +118,7 @@ void main () {
     float inside = 1.0 - smoothstep(r - 0.012, r, dist);
     vec4 rev = texture(uReveal, src);
     vec3 night = mix(vec3(0.03, 0.06, 0.07), vec3(0.07, 0.11, 0.12), vUv.y);
-    vec3 revRgb = mix(rev.rgb, hue * 0.78 * rev.a + rev.rgb * 0.25, amt * 0.75 * rev.a);
+    vec3 revRgb = rev.rgb + (hue * 0.55 * rev.a - rev.rgb * 0.25) * amt * 0.6 * rev.a;
     vec3 revCol = revRgb + night * (1.0 - rev.a);
     float rim = (1.0 - smoothstep(0.0, 0.03, abs(dist - r))) * step(0.02, holdRadius);
     float glow = exp(-max(dist - r, 0.0) * 22.0) * (1.0 - inside) * 0.5;
@@ -161,7 +161,7 @@ export function createFluid(canvas, { lowPower = false } = {}) {
 
   const SIM = lowPower ? 64 : 128;
   const DYE = lowPower ? 256 : 512;
-  const config = { velocityDissipation: 2.8, dyeDissipation: 2.4, pressure: 0.8, iterations: lowPower ? 12 : 20, curl: 10, radius: 0.0028, relax: 3.2 };
+  const config = { velocityDissipation: 2.4, dyeDissipation: 2.2, pressure: 0.8, iterations: lowPower ? 12 : 20, curl: 26, radius: 0.0014, relax: 2.8 };
 
   let vert;
   try { vert = compile(gl, gl.VERTEX_SHADER, BASE_VERT); } catch (e) { return null; }
