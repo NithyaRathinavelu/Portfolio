@@ -145,7 +145,7 @@ export default function Hero() {
       updateHold(dt);
       if (fluid) {
         if (pointer.moved) {
-          const dx = (pointer.x - pointer.px) * 4000, dy = (pointer.y - pointer.py) * 4000;
+          const dx = (pointer.x - pointer.px) * 3800, dy = (pointer.y - pointer.py) * 3800;
           if (Math.abs(dx) + Math.abs(dy) > 0.5) {
             pointer.colour = (pointer.colour + 1) % (DYE.length * 20);
             fluid.splat(pointer.x, pointer.y, dx, dy, DYE[Math.floor(pointer.colour / 20)]);
