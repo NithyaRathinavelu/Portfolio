@@ -94,16 +94,18 @@ void main () { outColor = value * texture(uTexture, vUv); }`;
 // Draws the arches, pushed by the fluid, with the dye on top and the
 // press-and-hold "night" circle. The scene texture is premultiplied.
 const DISPLAY = HEAD + `
-uniform sampler2D uImage; uniform sampler2D uDye; uniform sampler2D uReveal;
-uniform float aspectRatio; uniform vec2 holdPoint; uniform float holdRadius; uniform float time;
+uniform sampler2D uScene; uniform sampler2D uVelocity; uniform sampler2D uDye; uniform sampler2D uReveal;
+uniform float displace; uniform float aspectRatio; uniform vec2 holdPoint; uniform float holdRadius; uniform float time;
 void main () {
-  vec4 img = texture(uImage, vUv);
+  vec2 offset = texture(uVelocity, vUv).xy * displace;
+  float len = length(offset); if (len > 0.028) { offset *= 0.028 / len; }
+  vec4 img = texture(uScene, vUv - offset);
   vec3 dye = texture(uDye, vUv).rgb;
-  vec3 tint = min(dye * 0.6, vec3(0.34, 0.36, 0.3)) * mix(0.2, 1.0, img.a);
-  float a = clamp(max(img.a, max(tint.r, max(tint.g, tint.b)) * 1.4), 0.0, 1.0);
-  vec3 rgb = img.rgb * (1.0 - 0.35 * min(1.0, length(tint) * 2.0)) + tint;
+  vec3 tint = min(dye * 0.55, vec3(0.3, 0.32, 0.27));
+  vec3 rgb = img.rgb + tint;
+  float a = max(img.a, max(tint.r, max(tint.g, tint.b)));
 
-  // Press and hold: a wobbly liquid bubble that reveals a full-screen image in sage.
+  // Press and hold: a wobbly liquid bubble that reveals the dream places.
   if (holdRadius > 0.001) {
     vec2 d = vUv - holdPoint; d.x *= aspectRatio;
     float ang = atan(d.y, d.x);
@@ -111,9 +113,9 @@ void main () {
     float r = holdRadius * wob;
     float dist = length(d);
     float inside = 1.0 - smoothstep(r - 0.012, r, dist);
-    vec4 rev = texture(uReveal, vUv + dye.rg * 0.006);
+    vec4 rev = texture(uReveal, vUv - offset);
     vec3 night = mix(vec3(0.03, 0.06, 0.07), vec3(0.07, 0.11, 0.12), vUv.y);
-    vec3 revCol = rev.rgb + night * (1.0 - rev.a) + dye * 0.3;
+    vec3 revCol = rev.rgb + night * (1.0 - rev.a) + tint;
     float rim = (1.0 - smoothstep(0.0, 0.03, abs(dist - r))) * step(0.02, holdRadius);
     float glow = exp(-max(dist - r, 0.0) * 22.0) * (1.0 - inside) * 0.5;
     vec3 rimCol = vec3(0.92, 0.8, 0.66);
@@ -155,7 +157,7 @@ export function createFluid(canvas, { lowPower = false } = {}) {
 
   const SIM = lowPower ? 64 : 128;
   const DYE = lowPower ? 256 : 512;
-  const config = { velocityDissipation: 0.8, dyeDissipation: 2.0, pressure: 0.8, iterations: lowPower ? 12 : 20, curl: 30, radius: 0.003, restore: 0.9 };
+  const config = { velocityDissipation: 1.35, dyeDissipation: 1.7, pressure: 0.8, iterations: lowPower ? 12 : 20, curl: 19, radius: 0.0018, displace: 0.00018 };
 
   let vert;
   try { vert = compile(gl, gl.VERTEX_SHADER, BASE_VERT); } catch (e) { return null; }
@@ -202,8 +204,6 @@ export function createFluid(canvas, { lowPower = false } = {}) {
     const dyeW = aspect >= 1 ? Math.round(DYE * aspect) : DYE, dyeH = aspect >= 1 ? DYE : Math.round(DYE / aspect);
     velocity = pair(simW, simH); dye = pair(dyeW, dyeH);
     divergence = target(simW, simH); curlT = target(simW, simH); pressure = pair(simW, simH);
-    const imgW = Math.min(canvas.width, lowPower ? 900 : 1600), imgH = Math.max(1, Math.round(imgW / aspect));
-    image = pair(imgW, imgH);
   }
   sizes();
 
@@ -266,21 +266,14 @@ export function createFluid(canvas, { lowPower = false } = {}) {
     gl.uniform2f(s.u.texelSize, ...dye.texel);
     gl.uniform1i(s.u.uVelocity, bind(0, velocity.read.tex)); gl.uniform1i(s.u.uSource, bind(1, dye.read.tex));
     gl.uniform1f(s.u.dissipation, config.dyeDissipation); blit(dye.write); dye.swap();
-    gl.uniform2f(s.u.texelSize, ...image.texel);
-    gl.uniform1i(s.u.uVelocity, bind(0, velocity.read.tex)); gl.uniform1i(s.u.uSource, bind(1, image.read.tex));
-    gl.uniform1f(s.u.dissipation, 0.0); blit(image.write); image.swap();
-    restore(Math.min(1, config.restore * dt));
-  }
-  function restore(amount) {
-    const r = P.restore; gl.useProgram(r.p); gl.uniform2f(r.u.texelSize, ...image.texel);
-    gl.uniform1i(r.u.uImage, bind(0, image.read.tex)); gl.uniform1i(r.u.uScene, bind(1, sceneTex));
-    gl.uniform1f(r.u.amount, amount); blit(image.write); image.swap();
   }
 
   function render(hold) {
     const s = P.display; gl.useProgram(s.p);
     gl.uniform2f(s.u.texelSize, 1 / canvas.width, 1 / canvas.height);
-    gl.uniform1i(s.u.uImage, bind(0, image.read.tex));
+    gl.uniform1i(s.u.uScene, bind(0, sceneTex));
+    gl.uniform1i(s.u.uVelocity, bind(3, velocity.read.tex));
+    gl.uniform1f(s.u.displace, config.displace);
     gl.uniform1i(s.u.uDye, bind(1, dye.read.tex));
     gl.uniform1i(s.u.uReveal, bind(2, revealTex));
     gl.uniform1f(s.u.time, performance.now() / 1000);
@@ -300,7 +293,6 @@ export function createFluid(canvas, { lowPower = false } = {}) {
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
       gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-      restore(1);
     },
     setReveal(source) {
       gl.bindTexture(gl.TEXTURE_2D, revealTex);
