@@ -5,11 +5,14 @@ export const metadata = {
   description:
     'Lead UX and product designer in Bengaluru, working on AI experiences, design systems and complex B2B products.',
   icons: { icon: '/images/logo-on-light.png' },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://nithyarathinavelu.in'),
   openGraph: {
     title: 'Nithya Rathinavelu: Lead UX and product designer',
     description: 'Shaping the complicated until it feels obvious.',
     type: 'website',
+    images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'Nithya Rathinavelu, Lead UX and product designer' }],
   },
+  twitter: { card: 'summary_large_image', images: ['/images/og-image.png'] },
 };
 
 export default function RootLayout({ children }) {
