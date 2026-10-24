@@ -1,11 +1,22 @@
 import './globals.css';
 
+// Reads the site address from Vercel, and falls back safely if it's missing or mistyped.
+function siteUrl() {
+  const raw = (process.env.NEXT_PUBLIC_SITE_URL || '').trim().replace(/^["']|["']$/g, '');
+  const withProtocol = raw && !/^https?:\/\//.test(raw) ? `https://${raw}` : raw;
+  try {
+    return new URL(withProtocol || 'https://nithya-rathinavelu-portfolio.vercel.app');
+  } catch {
+    return new URL('https://nithya-rathinavelu-portfolio.vercel.app');
+  }
+}
+
 export const metadata = {
   title: 'Nithya Rathinavelu: Lead UX and product designer',
   description:
     'Lead UX and product designer in Bengaluru, working on AI experiences, design systems and complex B2B products.',
   icons: { icon: '/images/logo-on-light.png' },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://nithyarathinavelu.in'),
+  metadataBase: siteUrl(),
   openGraph: {
     title: 'Nithya Rathinavelu: Lead UX and product designer',
     description: 'Shaping the complicated until it feels obvious.',
