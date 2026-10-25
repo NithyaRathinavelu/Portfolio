@@ -24,6 +24,7 @@ function Text({ node, ctx }) {
   const [r, x] = node;
   if (x === 'Back to all work') return <Link className="cs-back" href="/#work">Back to all work</Link>;
   if (ctx.isNext && (r === 'h1' || r === 'h2')) return <p className="cs-h1">{ctx.nextTitle}</p>;
+  if (/^Try the clickable prototype/.test(x)) return <a className="text-link cs-proto" href="https://www.figma.com/proto/9V49V8BeM1qppQIF4tBxzU/WS?node-id=408-111&starting-point-node-id=408%3A111" target="_blank" rel="noopener noreferrer">Try the clickable prototype</a>;
   if (/^See the AI assistant case study/.test(x)) return <Link className="text-link" href="/work/conversational-ai">{x}</Link>;
   if (r === 'h1') return ctx.hero ? <h1 className="cs-h1">{x}</h1> : <p className="cs-h1">{x}</p>;
   if (r === 'h2') return <h2 className={ctx.inCard ? 'cs-num' : 'cs-h2'}>{x}</h2>;
@@ -38,7 +39,7 @@ function Text({ node, ctx }) {
 
 function Node({ node, ctx }) {
   if (Array.isArray(node)) return <Text node={node} ctx={ctx} />;
-  if (node.i) return <CsImage src={`/images/work/${ctx.slug}/${String(node._n).padStart(2, '0')}.jpg`} label={node.i} ratio={node.a} tag={node.tg} />;
+  if (node.i) return <CsImage src={`/images/${ctx.slug}/${String(node._n).padStart(2, '0')}.jpg`} label={node.i} ratio={node.a} tag={node.tg} />;
   const kids = node.k || [];
 
   if (node.n === 'Jump to') {
