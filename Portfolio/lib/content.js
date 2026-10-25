@@ -93,6 +93,25 @@ export const about = {
       'Designed SaaS dashboards and e-commerce products for four clients at once, owning research to handoff solo.',
     ] },
   ],
+  lead: {
+    intro: 'I mentor and guide a team of 8 designers. My job is to raise the quality of everyone’s work, not just my own, and to build a team that doesn’t stall when one person is away.',
+    principle: {
+      title: 'How I divide the work',
+      text: 'Every designer works across all our products, with one area they go a little deeper on. New and junior designers start paired with a senior designer until they know the product. No project depends on one person, and everyone understands how the products fit together.',
+    },
+    practices: [
+      ['1:1 reviews on every designer’s work', 'I review each designer’s work one-to-one, with specific, direct feedback on the problem, the flow and the details. It keeps one quality bar across the team, and lets me coach each person on what they need.'],
+      ['Design reviews with product and engineering', 'Before anything is built, I review flows with product and engineering against real use cases and what can be built, so problems are caught in design, not in code.'],
+      ['Design QA before every release', 'I brought in design QA before release: checking what was built against the design. It cut post-release design regressions by about 40%.'],
+      ['Design system governance', 'I own how components are proposed, added and changed, so every designer and product team builds from the same source without the system drifting.'],
+      ['Hiring and onboarding', 'I take part in hiring designers, and onboard new ones by pairing them with a senior designer and starting them on real work in the products.'],
+    ],
+    stats: [
+      ['8', 'designers I mentor and guide'],
+      ['~40%', 'fewer post-release design regressions after design QA'],
+      ['15+', 'stakeholders in the workshops and design sprints I run'],
+    ],
+  },
   skills: [
     ['End-to-end product design', 'Research, information architecture, interaction and visual design, prototyping, usability testing, edge cases, error states and WCAG accessibility.'],
     ['Design systems', 'Built one from scratch: tokens, typography, colour, spacing, motion and 80+ components, with governance and cross-team adoption.'],
