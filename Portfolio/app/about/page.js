@@ -20,7 +20,7 @@ export default function About() {
               <h1 id="hello" className="display display--xl">Hello, I’m Nithya.</h1>
               <p className="lead">
                 I’m a lead UX and product designer in Bengaluru with 7+ years of designing enterprise SaaS, design systems
-                and AI products used by tens of thousands of people every day.
+                and AI products for a platform with 50,000+ active users.
               </p>
               <p>
                 I care about the moment complex things become simple: when a 7-step legal process feels obvious, or an AI
@@ -56,7 +56,7 @@ export default function About() {
               <p className="label">Experience</p>
               <h2 id="exp-title" className="display">How I got here</h2>
             </div>
-            <p className="heading__intro">Six years growing with one enterprise SaaS company, after a year of freelancing.</p>
+            <p className="heading__intro">Seven years growing with one enterprise SaaS company, after a year of freelancing.</p>
           </div>
           <ol className="timeline">
             {about.roles.map((r) => (
@@ -130,7 +130,7 @@ export default function About() {
             {about.polaroids.map((p) => (
               <li className="polaroid" key={p.title} style={{ '--tilt': `${p.tilt}deg`, '--drop': `${p.drop}px`, '--photo-tilt': `${p.photoTilt || 0}deg` }}>
                 <span className="polaroid__tape" aria-hidden="true" />
-                <img src={p.image} alt="" />
+                <img src={p.image} alt={p.title} />
                 <p className="polaroid__title">{p.title}</p>
                 <p className="polaroid__note">{p.note}</p>
               </li>
