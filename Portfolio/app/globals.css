@@ -431,3 +431,20 @@ ul, ol { padding: 0; list-style: none; }
 
 /* Each photo sits slightly askew inside its polaroid, like in the Figma design */
 .polaroid img { transform: rotate(var(--photo-tilt, 0deg)); box-shadow: 0 1px 3px rgba(31, 42, 36, 0.12); }
+.cs-proto { font-size: 17px; }
+.cs-proto::after { content: '  ↗'; }
+
+/* About: How I lead */
+.lead__principle { background: var(--ink, #1F2A24); color: #F5F3EE; border-radius: 24px; padding: clamp(26px, 3.4vw, 44px); margin-bottom: 20px; }
+.lead__principle .label { color: #A9BDAA; }
+.lead__principle-text { font-family: var(--serif); font-size: clamp(21px, 2.1vw, 28px); line-height: 1.4; color: #F5F3EE; max-width: 52ch; margin-top: 12px; }
+.lead__practices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.lead__practices li { background: #fff; border: 1px solid rgba(31, 42, 36, 0.08); border-radius: 20px; padding: 26px; display: flex; flex-direction: column; gap: 10px; }
+.lead__practices h3 { font-family: var(--serif); font-weight: 500; font-size: 22px; line-height: 1.25; color: var(--ink); }
+.lead__practices p { font-size: 15px; }
+.lead__stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; margin-top: 28px; padding-top: 28px; border-top: 1px solid rgba(31, 42, 36, 0.12); }
+.lead__num { font-family: var(--serif); font-size: clamp(38px, 4vw, 52px); line-height: 1; color: var(--ink); margin-bottom: 8px; }
+.lead__stats p:not(.lead__num) { font-size: 15px; max-width: 26ch; }
+.lead__practices li:last-child { grid-column: span 2; }
+@media (max-width: 900px) { .lead__practices { grid-template-columns: 1fr 1fr; } .lead__practices li:last-child { grid-column: auto; } }
+@media (max-width: 600px) { .lead__practices, .lead__stats { grid-template-columns: 1fr; } .lead__practices li:last-child { grid-column: auto; } }
