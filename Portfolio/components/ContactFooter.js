@@ -13,7 +13,7 @@ export default function ContactFooter({ topId = 'top' }) {
         <ResumeMenu variant="ghost" />
       </div>
       <div className="contact__foot">
-        <span>© 2026 Nithya R</span>
+        <span>© 2026 Nithya Rathinavelu</span>
         <span>Bengaluru, India</span>
         <a href={`#${topId}`} className="back-top">Back to top <span aria-hidden="true">↑</span></a>
       </div>
