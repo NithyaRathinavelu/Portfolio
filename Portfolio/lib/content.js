@@ -70,7 +70,7 @@ export const about = {
   ],
   story: [
     'I studied computer applications, then did an MBA in human resources. Looking back, that pairing explains how I design: I understand how software is built, and I care about the people who have to use it.',
-    'I began as a freelance UX designer, designing SaaS dashboards and e-commerce products for four clients at once and handling everything from research to developer handoff on my own. Then I joined an enterprise SaaS company and grew there for six years, from UX designer to senior product designer to lead.',
+    'I began as a freelance UX designer, designing SaaS dashboards and e-commerce products for four clients at once and handling everything from research to developer handoff on my own. Then I joined an enterprise SaaS company and grew there for seven years, from UX designer to senior product designer to lead.',
     'Today I lead product design across a growing suite of enterprise apps, built and own our design system, and design AI that acts on people’s behalf. I’m especially drawn to AI experience design: making powerful systems understandable, honest and safe to trust.',
   ],
   roles: [
