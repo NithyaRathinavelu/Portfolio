@@ -74,7 +74,7 @@ export default function Home() {
               <p className="label">Selected work</p>
               <h2 id="work-title" className="display">Four projects, from problem to outcome</h2>
             </div>
-            <p className="heading__intro">Two AI projects, a design system, and two products live with customers.</p>
+            <p className="heading__intro">Two AI projects and two products live with customers, each from problem to outcome.</p>
           </div>
           <div className="projects">
             {projects.map((p) => (
