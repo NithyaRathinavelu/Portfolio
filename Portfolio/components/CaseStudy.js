@@ -39,7 +39,7 @@ function Text({ node, ctx }) {
 
 function Node({ node, ctx }) {
   if (Array.isArray(node)) return <Text node={node} ctx={ctx} />;
-  if (node.i) return <CsImage src={`/images/${ctx.slug}/${String(node._n).padStart(2, '0')}.jpg`} label={node.i} ratio={node.a} tag={node.tg} />;
+  if (node.i) return <CsImage src={`/images/${ctx.slug}/${String(node.f || node._n).padStart(2, '0')}.jpg`} label={node.i} ratio={node.a} tag={node.tg} />;
   const kids = node.k || [];
 
   if (node.n === 'Jump to') {
