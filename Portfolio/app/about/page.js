@@ -77,6 +77,30 @@ export default function About() {
           </ol>
         </section>
 
+        <section className="section leadership" aria-labelledby="lead-title">
+          <div className="heading">
+            <div>
+              <p className="label">How I lead</p>
+              <h2 id="lead-title" className="display">A team where no project depends on <em>one person</em></h2>
+            </div>
+            <p className="heading__intro">{about.lead.intro}</p>
+          </div>
+          <div className="lead__principle">
+            <p className="label">{about.lead.principle.title}</p>
+            <p className="lead__principle-text">{about.lead.principle.text}</p>
+          </div>
+          <ul className="lead__practices">
+            {about.lead.practices.map(([t, d]) => (
+              <li key={t}><h3>{t}</h3><p>{d}</p></li>
+            ))}
+          </ul>
+          <ul className="lead__stats">
+            {about.lead.stats.map(([n, l]) => (
+              <li key={l}><p className="lead__num">{n}</p><p>{l}</p></li>
+            ))}
+          </ul>
+        </section>
+
         <section className="section" aria-labelledby="skills-title">
           <div className="heading heading--single">
             <div>
