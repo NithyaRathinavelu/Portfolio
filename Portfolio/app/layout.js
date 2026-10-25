@@ -4,10 +4,13 @@ import './globals.css';
 function siteUrl() {
   const raw = (process.env.NEXT_PUBLIC_SITE_URL || '').trim().replace(/^["']|["']$/g, '');
   const withProtocol = raw && !/^https?:\/\//.test(raw) ? `https://${raw}` : raw;
+  const fallback = new URL('https://nithya-rathinavelu-portfolio.vercel.app');
   try {
-    return new URL(withProtocol || 'https://nithya-rathinavelu-portfolio.vercel.app');
+    const url = new URL(withProtocol);
+    // A real address has a dot in it (like example.com); anything else is a typo.
+    return url.hostname.includes('.') ? url : fallback;
   } catch {
-    return new URL('https://nithya-rathinavelu-portfolio.vercel.app');
+    return fallback;
   }
 }
 
@@ -21,9 +24,9 @@ export const metadata = {
     title: 'Nithya Rathinavelu: Lead UX and product designer',
     description: 'Shaping the complicated until it feels obvious.',
     type: 'website',
-    images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'Nithya Rathinavelu, Lead UX and product designer' }],
+    images: [{ url: '/images/og-image-v2.png', width: 2400, height: 1260, alt: 'Nithya Rathinavelu, Lead UX and product designer' }],
   },
-  twitter: { card: 'summary_large_image', images: ['/images/og-image.png'] },
+  twitter: { card: 'summary_large_image', images: ['/images/og-image-v2.png'] },
 };
 
 export default function RootLayout({ children }) {
